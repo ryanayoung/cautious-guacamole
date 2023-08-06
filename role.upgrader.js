@@ -21,27 +21,47 @@ module.exports = {
 
         //drop off energy
         if (creep.memory.working == true) {
-            var repairables = creep.room.find(FIND_STRUCTURES, {
-                filter: object => object.hits < object.hitsMax
-            });
-            var targets = creep.room.find(FIND_STRUCTURES, {
+            var targets = []
+            var extensions = creep.room.find(FIND_STRUCTURES, {
                     filter: (structure) => {
-                        return (structure.structureType == STRUCTURE_EXTENSION || structure.structureType == STRUCTURE_SPAWN) &&
+                        return (structure.structureType == STRUCTURE_EXTENSION) &&
+                            structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
+                    }
+            });
+            var towers = creep.room.find(FIND_STRUCTURES, {
+                    filter: (structure) => {
+                        return (structure.structureType == STRUCTURE_TOWER) &&
                             structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
                     }
             });
             
+            if(Game.spawns.Spawn1.store.getFreeCapacity(RESOURCE_ENERGY) > 0) {
+                targets = targets.concat(Game.spawns.Spawn1);
+            }
+            if(extensions.length){
+                for(let i in extensions){
+                    targets = targets.concat(extensions[i]);
+                }
+                
+            }
+            if(towers.length){
+                for(let i in towers){
+                    targets = targets.concat(towers[i]);
+                }
+            }
             
-            if (targets.length > 0) {
+/*            if ((targets.length > 0) && (creep.room.controller.ticksToDowngrade > 10000)) {
                 if(creep.transfer(targets[0], RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
                     creep.moveTo(targets[0], {visualizePathStyle: {stroke: '#ffffff'}});
                 }
             }
-            else if (creep.upgradeController(creep.room.controller) == ERR_NOT_IN_RANGE) {
+            else 
+            */
+            if (creep.upgradeController(creep.room.controller) == ERR_NOT_IN_RANGE) {
                creep.moveTo(creep.room.controller, {visualizePathStyle: {stroke: '#ffffff'}});
             }
         }
-         else {
+        else {
             var source = creep.pos.findClosestByPath(FIND_SOURCES);
             if (queueFlag) {
                 var queue = creep.room.lookForAtArea(LOOK_CREEPS,29,3,31,7,true);
@@ -76,3 +96,4 @@ module.exports = {
          }
      }       
 };
+
